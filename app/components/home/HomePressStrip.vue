@@ -16,7 +16,7 @@ const marks: Mark[] = [
   <section class="press container" aria-label="Recognised by">
     <ul class="press__row">
       <li v-for="m in marks" :key="m.name" class="press__mark">
-        <NuxtImg :src="m.src" :alt="m.name" :width="m.width" :height="m.height" loading="lazy" />
+        <NuxtImg :src="m.src" :alt="m.name" :width="m.width" :height="m.height" loading="lazy" :style="{ '--w': `${m.width}px`, aspectRatio: `${m.width} / ${m.height}` }" />
       </li>
     </ul>
   </section>
@@ -31,12 +31,14 @@ const marks: Mark[] = [
     opacity: 0.85;
     transition: opacity var(--duration-base);
     &:hover { opacity: 1; }
-    img { width: auto; height: auto; max-height: 138px; object-fit: contain; }
+    // Explicit width + aspect-ratio reserve each logo's box before the lazy image loads. Without this the
+    // strip grows after load and shifts every pinned section below it (Journey, Intro end points).
+    img { width: calc(var(--w) * var(--logo-scale, 1)); height: auto; object-fit: contain; }
   }
 }
 
 @media (width <= 720px) {
   .press__row { gap: var(--space-xl); }
-  .press__mark img { max-height: 72px; max-width: 120px; }
+  .press__mark { --logo-scale: 0.52; } // 138px → ~72px tall
 }
 </style>

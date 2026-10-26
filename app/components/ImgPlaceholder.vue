@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // Stand-in until real photography is wired through <NuxtImg>.
-// Ratio system: 4:5 portrait · 3:2 landscape · 1:1 marquee tiles only · 16:9 film only.
-withDefaults(defineProps<{ ratio?: '4/5' | '3/2' | '1/1' | '16/9'; label?: string; dark?: boolean }>(), { ratio: '3/2' })
+// Ratio system: 4:5 portrait · 3:2 landscape · 4:3 featured filmstrip · 1:1 marquee tiles only · 16:9 film only.
+import type { ImgRatio } from '~/composables/useLightbox'
+
+withDefaults(defineProps<{ ratio?: ImgRatio; label?: string; dark?: boolean }>(), { ratio: '3/2' })
 </script>
 
 <template>

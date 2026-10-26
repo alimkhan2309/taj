@@ -1,4 +1,6 @@
 <script setup lang="ts">
+definePageMeta({ navOverlay: true }) // hero is a dark full-bleed photo
+
 useSeoMeta({
   title: 'The Taj Studio — Wedding Photography & Films in Surat',
   ogTitle: 'The Taj Studio — Wedding Photography & Films',
@@ -13,7 +15,7 @@ useSeoMeta({
     <HomeFilms />
     <HomePressStrip />
     <HomeCaseStudies />
-    <HomeAwaitingDesign title="Our Journey" note="Horizontal-scroll story: portrait, since 1997, awards, quote and signature. Figma frame in progress." />
+    <HomeJourney />
     <HomeAwaitingDesign title="Testimonials" note="Short endorsements with stars and a Google Reviews badge. Figma frame in progress." />
     <HomeWhatToExpect />
     <HomeContact />

@@ -62,8 +62,9 @@ onBeforeUnmount(() => observer?.disconnect())
   &--surface { background-color: var(--color-bg-surface); }
 
   &__grid { display: grid; grid-template-columns: 5fr 7fr; gap: var(--space-3xl); align-items: start; }
-  &__panel { position: sticky; top: calc(var(--nav-height) + var(--space-xl)); min-height: 60vh; border-left: 2px solid var(--color-border-subtle); padding-left: var(--space-lg); }
-  &__story { display: grid; gap: var(--space-lg); justify-items: start; }
+  // Panel fills the viewport under the nav and centres the story vertically while it's pinned.
+  &__panel { position: sticky; top: var(--nav-height); height: calc(100svh - var(--nav-height)); display: flex; align-items: center; }
+  &__story { display: grid; gap: var(--space-lg); justify-items: start; border-left: 2px solid var(--color-border-subtle); padding-left: var(--space-lg); padding-block: var(--space-md); }
   &__meta { color: var(--color-text-secondary); }
   &__quote { margin: 0; font-style: italic; color: var(--color-text-secondary); span { font-family: var(--font-serif); font-size: 1.6em; color: var(--color-accent-on-light); line-height: 0; } }
   &__caption { color: var(--color-text-secondary); }
@@ -76,6 +77,6 @@ onBeforeUnmount(() => observer?.disconnect())
 
 @media (width <= 900px) {
   .cs__grid { grid-template-columns: 1fr; }
-  .cs__panel { position: static; min-height: 0; }
+  .cs__panel { position: static; height: auto; }
 }
 </style>

@@ -13,17 +13,10 @@ defineProps<{ overline: string; title: string; subtext: string; spec: string[] }
         </ul>
       </div>
     </section>
-    <section class="section section--surface stub-cta">
-      <div class="container stub-cta__inner">
-        <h3>Ready to talk?</h3>
-        <BaseButton to="/contact">Inquire</BaseButton>
-      </div>
-    </section>
+    <CtaBand />
   </div>
 </template>
 
 <style scoped>
 .stub { padding-top: calc(var(--nav-height) + var(--space-4xl)); }
-.stub__spec { color: var(--color-text-secondary); display: grid; gap: var(--space-xs); }
-.stub-cta__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); flex-wrap: wrap; }
-</style>
+.stub__spec { color: var(--color-text-secondary); display: grid; gap: var(--space-xs); }</style>

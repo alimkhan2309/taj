@@ -5,5 +5,6 @@
       <slot />
     </main>
     <AppFooter />
+    <AppLightbox />
   </div>
 </template>

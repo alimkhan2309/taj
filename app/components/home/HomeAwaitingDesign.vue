@@ -6,7 +6,7 @@ defineProps<{ title: string; note: string }>()
 <template>
   <section class="section awaiting">
     <div class="container">
-      <p class="overline">Awaiting design</p>
+      <p class="overline">Hit the road, dude!</p>
       <h3>{{ title }}</h3>
       <p>{{ note }}</p>
     </div>

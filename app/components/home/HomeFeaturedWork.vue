@@ -1,11 +1,16 @@
 <script setup lang="ts">
-// Figma 733:65: bracketed intro (540) + 3:2 lead image (740), then a filmstrip of consistent 4:5 portrait tiles
-// that bleeds off the right edge. On first view the strip swooshes in from the right, each tile skewed and
-// stretched while moving, then settles flat.
+// Figma 733:65: bracketed intro (540) + 3:2 lead image (740), then a full-bleed marquee of 4:3 tiles.
+// The row slides in from the right once (one element, transform + opacity only); the inner track loops via CSS.
+// Hover pauses the loop. Reduced motion: no entrance, no loop.
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-const strip = Array.from({ length: 10 }, (_, i) => i)
+import type { LightboxItem } from '~/composables/useLightbox'
+
+// Placeholders until real photography lands: add `src` per item and the tiles + lightbox pick it up.
+const photos: LightboxItem[] = Array.from({ length: 10 }, (_, i) => ({ alt: `Featured photograph ${i + 1}`, ratio: '4/3' }))
+// Rendered twice so the loop (translateX -50%) is seamless; the copy maps back to the same lightbox index.
+const loop = Array.from({ length: photos.length * 2 }, (_, i) => i)
 
 const root = ref<HTMLElement>()
 let mm: gsap.MatchMedia | undefined
@@ -17,25 +22,16 @@ onMounted(() => {
 
   mm = gsap.matchMedia()
   mm.add('(prefers-reduced-motion: no-preference)', () => {
-    const q = gsap.utils.selector(el)
-    const track = q('.fw__strip')[0] as HTMLElement
-    const tiles = q('.fw__tile')
-
-    gsap.timeline({
-      scrollTrigger: { trigger: track, start: 'top 85%', once: true },
-      onStart: () => { gsap.set(track, { overflowX: 'hidden' }) }, // no scrollbar flicker while tiles are off to the right
-      onComplete: () => { gsap.set(track, { clearProps: 'overflowX' }) }
+    const row = el.querySelector('.fw__strip')
+    if (!row) return
+    gsap.from(row, {
+      xPercent: 35,
+      autoAlpha: 0,
+      duration: 1.4,
+      ease: 'power3.out',
+      force3D: true,
+      scrollTrigger: { trigger: row, start: 'top 90%', once: true }
     })
-      .from(tiles, {
-        x: () => window.innerWidth,
-        skewX: -24,
-        scaleX: 1.35,
-        transformOrigin: 'left center',
-        autoAlpha: 0,
-        duration: 1.2,
-        stagger: 0.06,
-        ease: 'expo.out'
-      })
   })
 })
 
@@ -55,9 +51,11 @@ onBeforeUnmount(() => mm?.revert())
         </BracketFrame>
         <BracketFrame class="fw__lead"><ImgPlaceholder ratio="3/2" label="Featured wedding" /></BracketFrame>
       </div>
+    </div>
 
-      <div class="fw__strip">
-        <ImgPlaceholder v-for="i in strip" :key="i" ratio="4/5" class="fw__tile" :label="`Featured photograph ${i + 1}`" />
+    <div class="fw__strip" aria-label="Featured photographs">
+      <div class="fw__track">
+        <PhotoTile v-for="n in loop" :key="n" :items="photos" :index="n % photos.length" :decorative="n >= photos.length" class="fw__tile" />
       </div>
     </div>
   </section>
@@ -77,21 +75,25 @@ onBeforeUnmount(() => mm?.revert())
   &__intro-body { height: 100%; display: grid; gap: var(--space-lg); align-content: center; justify-items: start; padding: var(--space-xl); :deep(.section-header) { margin-bottom: 0; } }
   &__copy { color: var(--color-text-secondary); font-size: var(--text-body-lg); max-width: 460px; }
 
-  // Consistent 4:5 tiles; the row bleeds past the right page margin like the Figma frame.
-  &__strip {
+  // Full-bleed marquee. Outer row = GSAP entrance; inner track = CSS loop, so the two transforms never fight.
+  // Vertical padding leaves room for the PhotoTile hover pop inside the clipped row.
+  &__strip { margin-top: var(--space-xl); padding-block: var(--space-md); overflow: hidden; }
+  &__track {
     display: flex;
     gap: var(--space-2xs);
-    margin-top: var(--space-2xl);
-    margin-right: calc(50% - 50vw);
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
+    padding-right: var(--space-2xs); // trailing gap so -50% lands exactly on the second copy
+    width: max-content;
+    animation: fw-marquee 50s linear infinite;
+    &:hover { animation-play-state: paused; }
   }
-  &__tile { flex: 0 0 clamp(120px, 11vw, 160px); scroll-snap-align: start; }
+  &__track &__tile { flex: none; width: clamp(160px, 16vw, 240px); } // beats PhotoTile's own width: 100%
 }
+
+@keyframes fw-marquee { to { transform: translate3d(-50%, 0, 0); } }
 
 @media (width <= 900px) {
   .fw { grid-template-columns: 1fr; }
   .fw .fw__intro.bracket { --size: 40px; }
 }
+@media (prefers-reduced-motion: reduce) { .fw__track { animation: none; } }
 </style>
