@@ -45,9 +45,16 @@ onMounted(() => {
       const cardW = () => Math.min(480, stage.clientWidth * (small ? 0.62 : 0.8))
       const cardH = () => (cardW() * 253) / 480
 
-      const sig = gsap.timeline({ paused: true })
-        .set(q('.intro__sig'), { autoAlpha: 1 })
-        .from(q('.intro__sig path'), { drawSVG: 0, duration: 1.1, ease: 'power2.out' }) // one continuous stroke
+      // Handwriting: strokes drawn one after another in writing order, each timed by its length (constant pen
+      // speed), overlapping slightly so the pen never visibly stops. ~1.6s for the whole signature.
+      const PEN = 1900 // viewBox units per second
+      const sig = gsap.timeline({ paused: true }).set(q('.intro__sig'), { autoAlpha: 1 })
+      el.querySelectorAll<SVGPathElement>('.intro__sig path').forEach((p) => {
+        const len = p.getTotalLength()
+        // i/j dots: a round cap shows even at 0 drawn length, so dots pop in at their turn instead.
+        if (len < 10) sig.from(p, { autoAlpha: 0, duration: 0.08, ease: 'none' }, '>')
+        else sig.from(p, { drawSVG: 0, duration: len / PEN, ease: 'power1.inOut' }, '>-0.03')
+      })
 
       // Signature trigger: once the pin passes SIG_AT (card settled, rows in), play; scrolling back above it un-draws.
       const SIG_AT = 0.72
@@ -131,7 +138,7 @@ onBeforeUnmount(() => { mm?.revert(); clearInterval(tick) })
         <span class="intro__corner intro__corner--br" aria-hidden="true" />
 
         <div class="intro__card" aria-hidden="true">
-          <TajSignature class="intro__sig" :weight="3" />
+          <TajSignature class="intro__sig" />
         </div>
 
         <!-- Hero UI: viewfinder readout top-left; message + actions bottom-left; WhatsApp bottom-right. Fades on scroll. -->

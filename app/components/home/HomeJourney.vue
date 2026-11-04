@@ -112,7 +112,7 @@ onBeforeUnmount(() => { mm?.revert(); ctx?.revert() })
           </div>
           <figure class="journey__quote">
             <blockquote><p><span v-for="line in intro.quote" :key="line">{{ line }}</span></p></blockquote>
-            <figcaption class="journey__sig"><TajSignature :weight="1.6" /></figcaption>
+            <figcaption class="journey__sig"><TajSignature :weight="5" /></figcaption>
           </figure>
         </div>
 
