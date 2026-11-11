@@ -8,6 +8,7 @@
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { ImgRatio } from '~/composables/useLightbox'
+import { stats } from '~/data/studio'
 
 type Space = 'md' | 'lg' | 'xl' | '2xl' | '3xl'
 type Milestone = {
@@ -18,7 +19,6 @@ type Milestone = {
   low?: boolean // zig-zag: sits at the bottom of the stage instead of the top
   shift: Space // extra vertical offset from its edge, so the row never reads as a strict line
 }
-type Stat = { value: string; label: string }
 
 const intro = {
   overline: 'SINCE 1997',
@@ -37,12 +37,7 @@ const milestones: Milestone[] = [
   { title: 'Canon EOS influencer, India', ratio: '1/1', shift: '2xl' }
 ]
 
-// Client-confirmed figures only (not 2000+ weddings / 382 awards).
-const stats: Stat[] = [
-  { value: '22+', label: 'years' },
-  { value: '18', label: 'countries' },
-  { value: '1,200+', label: 'weddings' }
-]
+// Stats (years / countries / weddings) come from ~/data/studio, shared with About.
 
 // Depth layer behind the cards; positions are % of the awards area.
 const numerals = [
@@ -112,7 +107,7 @@ onBeforeUnmount(() => { mm?.revert(); ctx?.revert() })
           </div>
           <figure class="journey__quote">
             <blockquote><p><span v-for="line in intro.quote" :key="line">{{ line }}</span></p></blockquote>
-            <figcaption class="journey__sig"><TajSignature :weight="5" /></figcaption>
+            <figcaption class="journey__sig"><TajSignature :weight="2.5" /></figcaption>
           </figure>
         </div>
 
@@ -125,7 +120,7 @@ onBeforeUnmount(() => { mm?.revert(); ctx?.revert() })
                 class="journey__portrait-img" width="711" height="715" sizes="xs:90vw md:560px" loading="lazy" />
             </BracketFrame>
             <dl class="journey__stats">
-              <div v-for="(s, i) in stats" :key="s.label" class="journey__stat" :class="`journey__stat--${i}`">
+              <div v-for="(s, i) in stats" :key="s.label" class="journey__stat paper" :class="`journey__stat--${i}`">
                 <dt class="overline">{{ s.label }}</dt>
                 <dd>{{ s.value }}</dd>
               </div>
@@ -178,7 +173,7 @@ onBeforeUnmount(() => { mm?.revert(); ctx?.revert() })
   &__quote { margin: 0; display: grid; gap: var(--space-sm); justify-items: start;
     blockquote { margin: 0; }
     p { display: grid; font-family: var(--font-serif); font-size: var(--text-h3); line-height: 1.25; } }
-  &__sig { width: 172px; color: var(--color-accent-on-light); } // Figma signature vector: 172x67
+  &__sig { width: 200px; color: var(--color-accent-on-light); } // client signature artwork (wider than tall: ~4.3:1)
   &__portrait-img { display: block; width: 100%; height: auto; aspect-ratio: 711 / 715; }
 
   &__founder { position: relative; display: grid; justify-items: start; }
@@ -227,7 +222,7 @@ onBeforeUnmount(() => { mm?.revert(); ctx?.revert() })
 
     // Stats float round the portrait, on a base-colour chip so the crosshair passes behind them.
     &__stats { display: contents; }
-    &__stat { position: absolute; z-index: 2; padding: var(--space-xs) var(--space-sm); background: var(--color-bg-base); }
+    &__stat { position: absolute; z-index: 2; padding: var(--space-xs) var(--space-sm); background-color: var(--color-bg-base); }
     &__stat--0 { left: calc(100% + var(--space-lg)); top: 14%; }
     &__stat--1 { right: calc(100% + var(--space-lg)); top: 24%; }
     &__stat--2 { left: calc(100% + var(--space-2xl)); bottom: 12%; }

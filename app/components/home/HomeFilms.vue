@@ -87,7 +87,8 @@ onBeforeUnmount(() => mm?.revert())
 </script>
 
 <template>
-  <section ref="root" class="section films" id="films">
+  <!-- data-bg: the page backdrop scrubs to the dark surface as Films scrolls in (HomeBackdrop). -->
+  <section ref="root" class="section films paper--dark" id="films" data-bg="surface-inverse" data-bg-paper="0.32">
     <div class="container">
       <header class="films__head">
         <SectionHeader overline="Our films" title="Our Films" subtext="A selection of weddings and films we're proud to capture." />
@@ -131,7 +132,7 @@ onBeforeUnmount(() => mm?.revert())
 $rule: color-mix(in srgb, var(--color-text-on-dark) 16%, transparent);
 
 .films {
-  background: var(--color-surface-inverse);
+  background-color: var(--color-surface-inverse);
   color: var(--color-text-on-dark);
 
   // Header on dark: brand cyan is allowed on dark surfaces.
@@ -272,4 +273,8 @@ $rule: color-mix(in srgb, var(--color-text-on-dark) 16%, transparent);
   .films__poster { transition: none; }
   .films__title { transition: color var(--duration-base); }
 }
+
+// With the page backdrop running (HomeBackdrop), the dark comes from the backdrop colour shift, not a hard section edge.
+// Whole selector inside :global(): Vue's scoped compiler drops everything after a partial :global(.x).
+:global(html.has-backdrop .films) { background: none; }
 </style>

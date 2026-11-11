@@ -1,6 +1,6 @@
 // Shared lightbox state. Any gallery calls open(items, index, originEl); <AppLightbox> (mounted once in the
 // default layout) renders it. `origin` is the clicked element, so the viewer can grow out of it.
-export type ImgRatio = '4/5' | '3/2' | '4/3' | '1/1' | '16/9'
+export type ImgRatio = '4/5' | '3/2' | '4/3' | '1/1' | '16/9' | '2/3'
 
 export type LightboxItem = {
   src?: string // omit while the photo is still a placeholder; doubles as the poster for video items

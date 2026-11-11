@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer">
+  <footer class="footer paper--dark">
     <div class="container footer__grid">
       <div class="footer__brand">
         <p class="footer__tag">A studio that captures families' milestones — weddings, films, and the days in between.</p>
@@ -34,7 +34,7 @@
 
 <style scoped lang="scss">
 .footer {
-  background: var(--color-surface-inverse);
+  background-color: var(--color-surface-inverse);
   color: var(--color-text-on-dark);
   padding-block: var(--space-4xl);
 

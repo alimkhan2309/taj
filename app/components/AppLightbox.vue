@@ -8,6 +8,7 @@ import { gsap } from 'gsap'
 
 const { state, isOpen, current, close, next, prev, origin } = useLightbox()
 const route = useRoute()
+const { $lenis } = useNuxtApp()
 let opener: HTMLElement | null = null
 
 const dialog = ref<HTMLDialogElement>()
@@ -27,11 +28,13 @@ watch(isOpen, async (open) => {
   if (open) {
     opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
     document.documentElement.style.overflow = 'hidden'
+    $lenis.stop() // otherwise wheel input still glides the page behind the dialog
     d.showModal()
     await nextTick()
     animateIn()
   } else if (d.open) {
     document.documentElement.style.overflow = ''
+    $lenis.start()
     d.close()
     opener?.focus({ preventScroll: true }) // explicit, not every browser restores focus after dialog.close()
     opener = null
@@ -91,7 +94,7 @@ onBeforeUnmount(() => { document.documentElement.style.overflow = '' })
 </script>
 
 <template>
-  <dialog ref="dialog" class="lb" aria-modal="true" :aria-label="current?.ratio === '16/9' ? 'Film viewer' : 'Photo viewer'"
+  <dialog ref="dialog" class="lb" data-lenis-prevent aria-modal="true" :aria-label="current?.ratio === '16/9' ? 'Film viewer' : 'Photo viewer'"
     @cancel.prevent="requestClose" @click="onBackdrop" @keydown="onKey" @touchstart.passive="onTouchStart" @touchend="onTouchEnd">
     <template v-if="current">
       <button type="button" class="lb__close" aria-label="Close" @click="requestClose"><span aria-hidden="true" /></button>

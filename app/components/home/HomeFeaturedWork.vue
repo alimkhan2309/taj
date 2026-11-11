@@ -39,7 +39,8 @@ onBeforeUnmount(() => mm?.revert())
 </script>
 
 <template>
-  <section ref="root" class="section section--surface fw-section" id="featured-work">
+  <!-- No surface of its own: shares the base sheet with the intro above (one continuous background into Films). -->
+  <section ref="root" class="section fw-section" id="featured-work">
     <div class="container">
       <div class="fw">
         <BracketFrame always class="fw__intro">

@@ -1,6 +1,7 @@
 // Design tokens — The Taj Studio
-// Working palette: cool neutral (pending client confirmation of the warm -> cool pivot).
-// The warm palette is kept as a one-attribute fallback: <html data-palette="warm">.
+// Working palette: sand (beige paper), chosen after client feedback on 2026-11-11 ("more beige").
+// The previous cool-neutral palette is kept as a one-attribute fallback: <html data-palette="cool">.
+// All text/background pairs below pass WCAG AA (muted included); recheck when changing a value.
 
 :root {
   // Fonts
@@ -9,6 +10,7 @@
 
   // Type scale (Major Third)
   --text-mega: clamp(4rem, 9vw, 8rem); // oversized background lines (intro transition)
+  --text-hero: clamp(2.441rem, 6vw, 4.768rem); // inner-page titles (two Major Third steps above display)
   --text-display: 3.052rem;
   --text-h1: 2.441rem;
   --text-h2: 1.953rem;
@@ -19,23 +21,33 @@
   --text-body-sm: 0.8rem;
   --text-overline: 0.75rem;
 
-  // Canvas + text (cool neutral, hue ~185deg)
-  --color-bg-base: #f6fafb;
-  --color-bg-surface: #e9f1f2;
-  --color-bg-elevated: #ffffff;
-  --color-text-primary: #101c1f;
-  --color-text-secondary: #3f565c;
-  --color-text-muted: #8aa3a9;
-  --color-text-on-dark: #f6fafb;
-  --color-text-on-dark-muted: #afc5c9;
-  --color-border-subtle: #d2e1e4;
-  --color-border-strong: #8aa3a9;
-  --color-surface-inverse: #101c1f;
+  // Canvas + text (sand, hue ~38deg)
+  --color-bg-base: #f2ebdd;
+  --color-bg-surface: #e8dcc6;
+  --color-bg-elevated: #f9f5ec;
+  --color-text-primary: #1e1a16;
+  --color-text-secondary: #574c42;
+  --color-text-muted: #6c5f51;
+  --color-text-on-dark: #f2ebdd;
+  --color-text-on-dark-muted: #c2b6a3;
+  --color-border-subtle: #dccdb4;
+  --color-border-strong: #8a7962;
+  --color-surface-inverse: #1e1a16;
+
+  // Image stand-ins until real photography lands
+  --color-placeholder: #b5a68f;
+  --color-placeholder-dark: #3b342d;
+
+  // Paper texture: a mid-grey tile soft-lit over each element's own background-color (see .paper in main.scss).
+  // Generated once (seamless, 512px); on dark surfaces a veil of the surface colour knocks it back.
+  --texture-paper: url('/textures/paper-512.webp');
+  --texture-size: 512px;
+  --paper-veil: color-mix(in srgb, var(--color-surface-inverse) 68%, transparent);
 
   // Accent (identical in both palettes)
   --color-accent-brand: #0dccdf; // icons, rings, brackets, dots, on-dark only. Never text on light.
   --color-accent-hover: #0bb8c9;
-  --color-accent-on-light: #0a7480; // cyan as text on the light canvas
+  --color-accent-on-light: #0a6670; // cyan as text on the light canvas (5.6:1 on base, 4.9:1 on surface)
   --color-accent-subtle: rgb(13 204 223 / 12%);
   --color-accent-border: rgb(13 204 223 / 30%);
 
@@ -59,8 +71,8 @@
   --radius: 0;
 
   // Shadows (two levels only)
-  --shadow-sm: 0 1px 3px rgb(16 28 31 / 6%), 0 1px 2px rgb(16 28 31 / 4%);
-  --shadow-md: 0 8px 20px rgb(16 28 31 / 10%);
+  --shadow-sm: 0 1px 3px rgb(30 26 22 / 6%), 0 1px 2px rgb(30 26 22 / 4%);
+  --shadow-md: 0 8px 20px rgb(30 26 22 / 10%);
 
   // Layout (1440 viewport, 1280 content, 12 col, 24 gutter)
   --layout-max-width: 1440px;
@@ -75,19 +87,23 @@
   --duration-base: 280ms;
 }
 
-:root[data-palette='warm'] {
-  --color-bg-base: #fbf7f0;
-  --color-bg-surface: #f3ecdf;
-  --color-text-primary: #2b2420;
-  --color-text-secondary: #6b6055;
-  --color-text-muted: #a89c8c;
-  --color-text-on-dark: #fbf7f0;
-  --color-text-on-dark-muted: #c9c0b4;
-  --color-border-subtle: #e5dccb;
-  --color-border-strong: #c9bba3;
-  --color-surface-inverse: #2b2420;
-  --shadow-sm: 0 1px 3px rgb(43 36 32 / 6%), 0 1px 2px rgb(43 36 32 / 4%);
-  --shadow-md: 0 8px 20px rgb(43 36 32 / 10%);
+:root[data-palette='cool'] {
+  --color-bg-base: #f6fafb;
+  --color-bg-surface: #e9f1f2;
+  --color-bg-elevated: #ffffff;
+  --color-text-primary: #101c1f;
+  --color-text-secondary: #3f565c;
+  --color-text-muted: #566d73; // was #8aa3a9 (2.3:1, failed AA); now 4.8:1 on surface
+  --color-text-on-dark: #f6fafb;
+  --color-text-on-dark-muted: #afc5c9;
+  --color-border-subtle: #d2e1e4;
+  --color-border-strong: #8aa3a9;
+  --color-surface-inverse: #101c1f;
+  --color-accent-on-light: #0a7480;
+  --color-placeholder: #7a8a8e;
+  --color-placeholder-dark: #2b3a3e;
+  --shadow-sm: 0 1px 3px rgb(16 28 31 / 6%), 0 1px 2px rgb(16 28 31 / 4%);
+  --shadow-md: 0 8px 20px rgb(16 28 31 / 10%);
 }
 
 @media (width <= 1100px) {

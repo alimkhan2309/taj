@@ -57,7 +57,12 @@ const isCurrent = (to: string) => (to === '/' ? route.path === '/' : route.path 
   background: linear-gradient(to bottom, rgb(0 0 0 / 35%), transparent);
   transition: background-color 280ms ease, color 280ms ease, box-shadow 280ms ease;
 
-  &--scrolled, &--open { background: var(--color-bg-elevated); color: var(--color-text-primary); box-shadow: var(--shadow-sm); }
+  &--scrolled, &--open {
+    background: var(--color-bg-elevated) var(--texture-paper) 0 0 / var(--texture-size);
+    background-blend-mode: soft-light;
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-sm);
+  }
 
   &__inner { height: 100%; display: flex; align-items: center; gap: var(--space-xl); }
   &__logo { margin-right: auto; display: flex; align-items: center; }

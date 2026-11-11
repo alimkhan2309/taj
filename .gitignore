@@ -23,3 +23,7 @@ logs
 .env.*
 !.env.example
 CLAUDE.md
+
+# Signature generator: local deps + previews (scripts/signature/vectorise.mjs)
+scripts/signature/package.json
+scripts/signature/preview*.png
