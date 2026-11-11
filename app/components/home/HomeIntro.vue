@@ -1,48 +1,40 @@
 <script setup lang="ts">
 // Hero -> Transition as one pinned, scrubbed scene (Figma 733:130 hero, 733:154 sign). Reference: landonorris.com.
 // 1. Full-bleed hero photo shrinks into the centred 480x253 card; the viewfinder corners travel and shrink with it.
-// 2. Portrait columns (2:3) slide in from the sides and run vertically in opposite directions; oversized text lines
-//    and the card brackets fade in around the card; text lines drift sideways.
+// 2. Rows of 2:3 portraits slide in above and below the card and run sideways in opposite directions; oversized
+//    text lines and the card brackets fade in around the card; text lines drift sideways.
 // 3. Past ~72% of the pin, the signature draws on (played, not scrubbed) and un-draws on the way back up.
 // Reduced motion: no pin, the scene renders in its final state.
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { LightboxItem } from '~/composables/useLightbox'
 
-// Vertical marquee: portrait columns either side of the card. Each track is 7 tiles rendered twice, so the CSS loop
-// (translateY -50%) is seamless; 7 x 2:3 tiles is taller than any common viewport. Inner columns only show on wide
-// screens, where they clear the signature overhang. Different speeds and directions give a little depth.
-// Tiles are black and white at rest. Hovering (or focusing) any tile pauses every column and brings that one tile
-// back to colour; clicking opens it in the shared lightbox, which pages through all portraits.
-type Column = { id: string; side: 'l' | 'r'; inner: boolean; up: boolean; speed: string; offset: string; first: number }
-const columns: Column[] = [
-  { id: 'l-outer', side: 'l', inner: false, up: true, speed: '70s', offset: '0s', first: 0 },
-  { id: 'l-inner', side: 'l', inner: true, up: false, speed: '95s', offset: '-30s', first: 14 },
-  { id: 'r-inner', side: 'r', inner: true, up: true, speed: '85s', offset: '-55s', first: 21 },
-  { id: 'r-outer', side: 'r', inner: false, up: false, speed: '65s', offset: '-12s', first: 7 }
+// Horizontal marquee: one row of portraits above the card, one below, running in opposite directions at slightly
+// different speeds. Each track is 14 tiles rendered three times, so the CSS loop (translateX by one set) is seamless
+// on screens up to ~4000px wide.
+// Tiles are black and white at rest. Hovering (or focusing) any tile pauses both rows and brings that one tile back
+// to colour; clicking opens it in the shared lightbox, which pages through all portraits.
+type Row = { id: string; side: 't' | 'b'; left: boolean; speed: string; offset: string; first: number }
+const rows: Row[] = [
+  { id: 'top', side: 't', left: true, speed: '90s', offset: '0s', first: 0 },
+  { id: 'bottom', side: 'b', left: false, speed: '110s', offset: '-40s', first: 14 }
 ]
-const PER_COLUMN = 7
+const PER_ROW = 14
+const COPIES = 3 // keep in sync with the slide-x keyframe
 
-// Portraits for the columns: 7 per column, outer columns first (0-13), so phones and laptops, which show only
-// the outer two, see 14 different photos. Add `src` (a /public path or CMS URL) to swap a placeholder for a photo;
-// keep them 2:3 portrait.
-const portraits: LightboxItem[] = Array.from({ length: PER_COLUMN * columns.length }, (_, i) => ({
+// Portraits for the rows: 14 each, top row first. Add `src` (a /public path or CMS URL) to swap a placeholder for a
+// photo; keep them 2:3 portrait.
+const portraits: LightboxItem[] = Array.from({ length: PER_ROW * rows.length }, (_, i) => ({
   alt: `Wedding portrait ${i + 1}`,
   ratio: '2/3'
 }))
-// Each track renders its 7 tiles twice for the seamless loop; the second set is decorative (skipped by keyboard / SR).
-const loop = Array.from({ length: PER_COLUMN * 2 }, (_, i) => i)
-
-// Viewfinder timecode next to REC, ticking from page load (decorative, aria-hidden).
-const seconds = ref(0)
-const timecode = computed(() => [Math.floor(seconds.value / 3600), Math.floor(seconds.value / 60) % 60, seconds.value % 60].map((n) => String(n).padStart(2, '0')).join(':'))
-let tick: ReturnType<typeof setInterval> | undefined
+// Only the first copy of each set is reachable by keyboard / screen readers; the repeats are decorative.
+const loop = Array.from({ length: PER_ROW * COPIES }, (_, i) => i)
 
 const root = ref<HTMLElement>()
 let mm: gsap.MatchMedia | undefined
 
 onMounted(() => {
-  tick = setInterval(() => { seconds.value++ }, 1000)
   gsap.registerPlugin(ScrollTrigger)
   const el = root.value
   if (!el) return
@@ -89,8 +81,7 @@ onMounted(() => {
           : undefined
       })
 
-      tl.to(q('.intro__ui'), { autoAlpha: 0, duration: 0.12, ease: 'none' }, 0)
-        .fromTo(q('.intro__frame'),
+      tl.fromTo(q('.intro__frame'),
           { width: () => stage.clientWidth - pad * 2, height: () => stage.clientHeight - pad * 2,
             '--corner': small ? '64px' : '176px', '--corner-w': '4px', '--corner-color': color('--color-text-on-dark') },
           { width: () => cardW() + gap * 2, height: () => cardH() + gap * 2,
@@ -99,7 +90,7 @@ onMounted(() => {
           { top: -pad, right: -pad, bottom: -pad, left: -pad },
           { top: gap, right: gap, bottom: gap, left: gap, duration: 0.6 }, 0)
         .fromTo(q('.intro__img'), { scale: 1.15 }, { scale: 1, duration: 0.6 }, 0)
-        .fromTo(q('.intro__col'), { autoAlpha: 0, x: (_: number, t: HTMLElement) => (t.dataset.side === 'r' ? 60 : -60) }, { autoAlpha: 1, x: 0, duration: 0.35, stagger: 0.05, ease: 'power2.out' }, 0.3)
+        .fromTo(q('.intro__row'), { autoAlpha: 0, y: (_: number, t: HTMLElement) => (t.dataset.side === 'b' ? 60 : -60) }, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.05, ease: 'power2.out' }, 0.3)
         .fromTo(q('.intro__lines'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: 'none' }, 0.35)
         .fromTo(q('.intro__line--a'), { xPercent: 8 }, { xPercent: -8, duration: 1, ease: 'none' }, 0)
         .fromTo(q('.intro__line--b'), { xPercent: -8 }, { xPercent: 8, duration: 1, ease: 'none' }, 0)
@@ -113,22 +104,23 @@ onMounted(() => {
   )
 })
 
-onBeforeUnmount(() => { mm?.revert(); clearInterval(tick) })
+onBeforeUnmount(() => { mm?.revert() })
 </script>
 
 <template>
   <section ref="root" class="intro" aria-label="The Taj Studio">
+    <!-- Minimal hero for now: photo and viewfinder corners only. The page heading stays for screen readers and SEO. -->
+    <h1 class="visually-hidden">The Taj Studio: wedding photography &amp; films in Surat</h1>
     <div class="intro__stage paper">
-      <!-- Text lines sit behind the columns: they read in the gaps between the columns and the card. -->
+      <!-- Text lines sit behind the rows: they read in the gaps between the rows and the card. -->
       <div class="intro__lines">
         <h2 class="intro__line intro__line--a">Surat’s premium wedding photographers</h2>
         <p class="intro__line intro__line--b" aria-hidden="true">Big weddings, raw emotions</p>
       </div>
 
-      <div v-for="c in columns" :key="c.id" class="intro__col" :class="[`intro__col--${c.side}`, { 'intro__col--inner': c.inner }]"
-        :data-side="c.side">
-        <div class="intro__track" :class="{ 'intro__track--down': !c.up }" :style="{ animationDuration: c.speed, animationDelay: c.offset }">
-          <PhotoTile v-for="n in loop" :key="n" :items="portraits" :index="c.first + (n % PER_COLUMN)" :decorative="n >= PER_COLUMN"
+      <div v-for="r in rows" :key="r.id" class="intro__row" :class="`intro__row--${r.side}`" :data-side="r.side">
+        <div class="intro__track" :class="{ 'intro__track--right': !r.left }" :style="{ animationDuration: r.speed, animationDelay: r.offset }">
+          <PhotoTile v-for="n in loop" :key="n" :items="portraits" :index="r.first + (n % PER_ROW)" :decorative="n >= PER_ROW"
             class="intro__tile" />
         </div>
       </div>
@@ -155,25 +147,6 @@ onBeforeUnmount(() => { mm?.revert(); clearInterval(tick) })
         <div class="intro__card" aria-hidden="true">
           <TajSignature class="intro__sig" />
         </div>
-
-        <!-- Hero UI: viewfinder readout top-left; message + actions bottom-left; WhatsApp bottom-right. Fades on scroll. -->
-        <div class="intro__ui">
-          <span class="intro__rec overline" aria-hidden="true"><i /> REC <span class="intro__tc">{{ timecode }}</span></span>
-
-          <div class="intro__lede">
-            <p class="intro__kicker overline">The Taj Studio · Since 1997</p>
-            <h1 class="intro__title">Wedding photography <br class="intro__br">&amp; films in Surat</h1>
-            <p class="intro__proof">1,200+ weddings across 18 countries</p>
-            <div class="intro__actions">
-              <BaseButton to="/contact" class="intro__cta">Check your date</BaseButton>
-              <NuxtLink to="/portfolio" class="intro__link overline">View our work →</NuxtLink>
-            </div>
-          </div>
-
-          <a class="intro__whatsapp" href="https://wa.me/919558194459" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
-            <span class="intro__wa-icon" aria-hidden="true" />
-          </a>
-        </div>
       </div>
     </div>
   </section>
@@ -186,8 +159,9 @@ onBeforeUnmount(() => { mm?.revert(); clearInterval(tick) })
   &__stage {
     --card-w: min(480px, 80vw);
     --card-h: calc(var(--card-w) * 253 / 480);
-    --tile: clamp(104px, 9.5vw, 150px); // column width; tiles are 2:3
-    --col-edge: var(--space-lg); // outer column inset from the viewport edge
+    // Row height: what fits between the nav and the card, capped. Tiles are 2:3, so width follows.
+    --row: clamp(120px, calc((100svh - var(--card-h)) / 2 - var(--nav-height) - var(--space-2xl)), 220px);
+    --row-gap: calc(var(--card-h) / 2 + var(--space-sm) + var(--space-lg)); // centre to row edge: card + bracket gap + air
     position: relative;
     height: 100svh;
     min-height: 560px;
@@ -195,24 +169,30 @@ onBeforeUnmount(() => { mm?.revert(); clearInterval(tick) })
     background-color: var(--color-bg-base); // + .paper: the pinned stage carries its own sheet, so paper never slides behind it
   }
 
-  // Marquee columns: outer column is GSAP's (fade/slide in), inner track is the CSS loop. Keeps the two transforms apart.
-  &__col {
+  // Marquee rows: the row is GSAP's (fade/slide in), the inner track is the CSS loop. Keeps the two transforms apart.
+  &__row {
     position: absolute;
-    top: 0;
-    width: var(--tile);
+    left: 0;
+    height: var(--row);
     opacity: 0;
-    &--l { left: var(--col-edge); }
-    &--r { right: var(--col-edge); }
-    &--l.intro__col--inner { left: calc(var(--col-edge) + var(--tile) + var(--space-xs)); }
-    &--r.intro__col--inner { right: calc(var(--col-edge) + var(--tile) + var(--space-xs)); }
-    &--inner { display: none; }
+    &--t { bottom: calc(50% + var(--row-gap)); }
+    &--b { top: calc(50% + var(--row-gap)); }
   }
-  // padding-bottom = gap, so the doubled track is exactly twice one set and -50% lands seamlessly.
-  &__track { display: flex; flex-direction: column; gap: var(--space-xs); padding-bottom: var(--space-xs); animation: slide-up 70s linear infinite; &--down { animation-direction: reverse; } }
+  // padding-right = gap, so the tripled track is exactly three sets and -1/3 lands seamlessly.
+  &__track {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    gap: var(--space-xs);
+    padding-right: var(--space-xs);
+    animation: slide-x 90s linear infinite;
+    &--right { animation-direction: reverse; }
+  }
   // Black and white at rest; the hovered / focused tile returns to colour (PhotoTile adds the lift + zoom cursor).
   // Transition lists PhotoTile's own properties too, since this declaration replaces its transition on the same element.
   & &__tile {
     flex: none;
+    width: calc(var(--row) * 2 / 3);
     filter: grayscale(1);
     transition: filter 500ms var(--ease-out), transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
     &:hover, &:focus-visible { filter: none; }
@@ -274,89 +254,18 @@ onBeforeUnmount(() => { mm?.revert(); clearInterval(tick) })
   // Signature overhangs the card (145% wide), centred on it.
   &__sig { position: absolute; left: 50%; top: 50%; width: 145.4%; translate: -50% -50%; color: var(--color-accent-brand); opacity: 0; visibility: hidden; }
 
-  &__ui {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-end;
-    gap: var(--space-xl);
-    padding: var(--space-3xl);
-    color: var(--color-text-on-dark);
-    background: linear-gradient(to top, rgb(0 0 0 / 45%), transparent 50%); // legibility for the headline
-  }
-
-  // Camera readout, top-left just under the nav.
-  &__rec {
-    position: absolute;
-    top: calc(var(--nav-height) + var(--space-md));
-    left: var(--space-3xl);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
-    i { width: 12px; height: 12px; background: var(--color-accent-brand); animation: rec 2.4s ease-in-out infinite; }
-  }
-  &__tc { margin-left: var(--space-xs); color: var(--color-text-on-dark-muted); font-variant-numeric: tabular-nums; }
-
-  &__lede { display: grid; gap: var(--space-md); justify-items: start; max-width: var(--content-max-width); }
-  &__kicker { color: var(--color-text-on-dark-muted); }
-  &__title {
-    font-family: var(--font-serif);
-    font-size: clamp(var(--text-h1), 5.2vw, calc(var(--text-display) * 1.5));
-    font-weight: 500;
-    line-height: 1.02;
-    letter-spacing: -0.025em;
-    color: var(--color-text-on-dark);
-  }
-  &__proof { color: var(--color-text-on-dark-muted); font-size: var(--text-body-lg); }
-  &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-lg) var(--space-xl); margin-top: var(--space-xs); }
-  // Primary on dark: light fill, cyan on hover (BaseButton's charcoal would vanish on the photo).
-  & &__cta.btn { background: var(--color-bg-base); border-color: var(--color-bg-base); color: var(--color-text-primary);
-    &:hover { background: var(--color-accent-brand); border-color: var(--color-accent-brand); } }
-  &__link {
-    padding-block: var(--space-2xs);
-    border-bottom: 1px solid currentcolor;
-    color: var(--color-text-on-dark);
-    transition: color var(--duration-base), border-color var(--duration-base);
-    &:hover { color: var(--color-accent-brand); }
-  }
-
-  // WhatsApp: the PNG glyph is used as a mask so its colour is ours; brand green on hover.
-  &__whatsapp {
-    margin-left: auto;
-    flex: none;
-    color: var(--color-text-on-dark);
-    transition: color var(--duration-base), transform var(--duration-base) var(--ease-out);
-    &:hover, &:focus-visible { color: var(--color-whatsapp); transform: scale(1.06); }
-  }
-  &__wa-icon {
-    display: block;
-    width: 64px;
-    height: 64px;
-    background: currentcolor;
-    mask: url('/images/brand/whatsapp.png') center / contain no-repeat;
-  }
 }
 
-@keyframes slide-up { to { transform: translateY(-50%); } }
-@keyframes rec { 50% { opacity: 0.35; } }
+@keyframes slide-x { to { transform: translateX(calc(-100% / 3)); } }
 
-// Inner columns need room beside the signature overhang (~73% of the card width each side of centre).
-@media (width >= 1280px) { .intro__col--inner { display: block; } }
 @media (width <= 720px) {
-  // Phones: the signature spans ~90vw, so the columns peek in from the edges behind it.
-  .intro__stage { --card-w: 62vw; --tile: 96px; --col-edge: calc(var(--tile) * -0.5); }
-  .intro__ui :deep(.btn) { white-space: nowrap; padding-inline: var(--space-lg); }
+  .intro__stage { --card-w: 62vw; --row: clamp(120px, calc((100svh - var(--card-h)) / 2 - var(--nav-height) - var(--space-2xl)), 180px); }
   .intro__frame { --corner: 64px; }
-  .intro__ui { padding: var(--space-lg); gap: var(--space-md); }
-  .intro__rec { left: var(--space-lg); }
-  .intro__br { display: none; }
-  .intro__proof { font-size: var(--text-body); }
-  .intro__wa-icon { width: 44px; height: 44px; }
 }
-// Hovering or focusing any tile freezes all columns, so the target holds still under the pointer.
-// :has() covers the whole marquee; the per-column rule is the fallback where :has() is unsupported.
-.intro__col:hover .intro__track, .intro__col:focus-within .intro__track,
-.intro__stage:has(.intro__col:hover, .intro__col:focus-within) .intro__track { animation-play-state: paused; }
+// Hovering or focusing any tile freezes both rows, so the target holds still under the pointer.
+// :has() covers the whole marquee; the per-row rule is the fallback where :has() is unsupported.
+.intro__row:hover .intro__track, .intro__row:focus-within .intro__track,
+.intro__stage:has(.intro__row:hover, .intro__row:focus-within) .intro__track { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) { .intro__track { animation: none; } }
 
 // On the homepage the fixed backdrop is the sheet (it never slides either), so the stage goes clear: no seam below.
