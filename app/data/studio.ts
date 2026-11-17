@@ -21,9 +21,9 @@ export type PressMark = { name: string; src: string; width: number; height: numb
 export const pressMarks: PressMark[] = [
   { name: 'MyWed', src: '/images/press/mywed.png', width: 113, height: 138, display: 86 },
   { name: 'Admired in Africa', src: '/images/press/admired-in-africa.png', width: 230, height: 118, display: 66 },
-  { name: 'Fearless Photographers', src: '/images/press/fearless.png', width: 125, height: 138, display: 80 },
-  { name: 'WeddingSutra Photography Awards', src: '/images/press/weddingsutra.png', width: 142, height: 138, display: 88 },
-  { name: 'Wedisson Awards winner', src: '/images/press/wedisson.png', width: 150, height: 138, display: 88 }
+  { name: 'Fearless Photographers', src: '/images/press/fearless.png', width: 138, height: 138, display: 72 },
+  { name: 'WeddingSutra Photography Awards', src: '/images/press/weddingsutra.png', width: 161, height: 138, display: 76 },
+  { name: 'Wedisson Awards winner', src: '/images/press/wedisson.png', width: 194, height: 138, display: 70 }
 ]
 
 // Recognition timeline, oldest first. Mirrors the cards in Our Journey (which adds its own layout fields).
@@ -38,3 +38,16 @@ export const awards: Award[] = [
   { year: '2020–2021', title: 'WeddingSutra Photography Awards winner', by: 'WeddingSutra' },
   { title: 'Canon EOS influencer, India', by: 'Canon' }
 ]
+
+// Studio address (client-supplied, 2026-11-17). Also used to point at the Google listing.
+export const ADDRESS = '401 Sakar Complex, near Rupali Nahar, Bhatar Road, Surat, Gujarat 395001'
+
+// Google reviews. `rating` and `count` stay null until copied from the studio's Google Business Profile: never round
+// up or invent them. While null, the Testimonials section shows a plain "Read our Google reviews" link instead.
+export type GoogleReviews = { rating: string | null; count: string | null; url: string }
+
+export const googleReviews: GoogleReviews = {
+  rating: null,
+  count: null,
+  url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`The Taj Studio, ${ADDRESS}`)}`
+}

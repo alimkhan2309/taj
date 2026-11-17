@@ -6,5 +6,6 @@
     </main>
     <AppFooter />
     <AppLightbox />
+    <AppCornerMark />
   </div>
 </template>

@@ -8,7 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { LightboxItem } from '~/composables/useLightbox'
 
 // Placeholders until real photography lands: add `src` per item and the tiles + lightbox pick it up.
-const photos: LightboxItem[] = Array.from({ length: 10 }, (_, i) => ({ alt: `Featured photograph ${i + 1}`, ratio: '4/3' }))
+const photos: LightboxItem[] = Array.from({ length: 8 }, (_, i) => ({ alt: `Featured photograph ${i + 1}`, ratio: '4/3' }))
 // Rendered twice so the loop (translateX -50%) is seamless; the copy maps back to the same lightbox index.
 const loop = Array.from({ length: photos.length * 2 }, (_, i) => i)
 
@@ -56,7 +56,7 @@ onBeforeUnmount(() => mm?.revert())
 
     <div class="fw__strip" aria-label="Featured photographs">
       <div class="fw__track">
-        <PhotoTile v-for="n in loop" :key="n" :items="photos" :index="n % photos.length" :decorative="n >= photos.length" class="fw__tile" />
+        <PhotoTile v-for="n in loop" :key="n" :items="photos" :index="n % photos.length" :decorative="n >= photos.length" sizes="xs:240px md:26vw xl:400px" class="fw__tile" />
       </div>
     </div>
   </section>
@@ -84,10 +84,11 @@ onBeforeUnmount(() => mm?.revert())
     gap: var(--space-2xs);
     padding-right: var(--space-2xs); // trailing gap so -50% lands exactly on the second copy
     width: max-content;
-    animation: fw-marquee 50s linear infinite;
+    animation: fw-marquee 60s linear infinite; // ~50px/s with 8 tiles
     &:hover { animation-play-state: paused; }
   }
-  &__track &__tile { flex: none; width: clamp(160px, 16vw, 240px); } // beats PhotoTile's own width: 100%
+  // Large tiles, fewer of them (8): one set still outruns a 2560px screen, so the -50% loop stays seamless.
+  &__track &__tile { flex: none; width: clamp(240px, 26vw, 400px); } // beats PhotoTile's own width: 100%
 }
 
 @keyframes fw-marquee { to { transform: translate3d(-50%, 0, 0); } }

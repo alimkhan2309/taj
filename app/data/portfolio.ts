@@ -48,6 +48,17 @@ export const photos: PhotoItem[] = Array.from({ length: 30 }, (_, i) => {
   }
 })
 
+// Homepage pre-wedding preview (HomePreWedding): lead 4:5, then 1:1 (overlaps the lead) and 3:2. Order matters: the first is the lead.
+// Photos only, no couple names or places on screen. Add `src` and a describing `alt` per photo when the photography
+// lands. The lead is from Mohil & Harvi's shoot, so it links to their case study (via the lightbox).
+export type PreWeddingShoot = { ratio: PhotoRatio; alt?: string; caseStudySlug?: string; src?: string }
+
+export const preWeddingShoots: PreWeddingShoot[] = [
+  { ratio: '4/5', caseStudySlug: 'mohil-harvi' },
+  { ratio: '1/1' },
+  { ratio: '3/2' }
+]
+
 export const films: FilmItem[] = [
   { id: 'film-01', couple: 'Mohil & Harvi', location: 'Udaipur', runtime: '04:12', provider: 'vimeo', videoId: 'PLACEHOLDER-1' },
   { id: 'film-02', couple: 'Aarav & Diya', location: 'Jaipur', runtime: '05:40', provider: 'vimeo', videoId: 'PLACEHOLDER-2' },

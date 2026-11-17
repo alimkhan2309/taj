@@ -2,9 +2,10 @@
 // Clickable gallery tile: pops on hover/focus, opens the shared lightbox on click.
 // Pass the whole gallery (`items`) plus this tile's `index` so the lightbox can page through it.
 // `decorative` is for loop duplicates (marquees): still clickable, but skipped by keyboard and screen readers.
+// `sizes`: pass the tile's rendered width when it isn't the default ~240px, so real photos load sharp.
 import type { LightboxItem } from '~/composables/useLightbox'
 
-const props = defineProps<{ items: LightboxItem[]; index: number; decorative?: boolean }>()
+const props = withDefaults(defineProps<{ items: LightboxItem[]; index: number; decorative?: boolean; sizes?: string }>(), { sizes: 'xs:50vw md:25vw lg:240px' })
 const { open } = useLightbox()
 const item = computed(() => props.items[props.index])
 </script>
@@ -19,7 +20,7 @@ const item = computed(() => props.items[props.index])
     :aria-hidden="decorative ? 'true' : undefined"
     @click="open(items, index, $event.currentTarget)"
   >
-    <NuxtImg v-if="item.src" :src="item.src" :alt="item.alt" class="tile__img" :style="{ aspectRatio: item.ratio }" loading="lazy" sizes="xs:50vw md:25vw lg:240px" />
+    <NuxtImg v-if="item.src" :src="item.src" :alt="item.alt" class="tile__img" :style="{ aspectRatio: item.ratio }" loading="lazy" :sizes="sizes" />
     <ImgPlaceholder v-else :ratio="item.ratio" :label="item.alt" />
   </button>
 </template>

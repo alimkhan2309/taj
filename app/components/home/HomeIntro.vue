@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // Hero -> Transition as one pinned, scrubbed scene (Figma 733:130 hero, 733:154 sign). Reference: landonorris.com.
 // 1. Full-bleed hero photo shrinks into the centred 480x253 card; the viewfinder corners travel and shrink with it.
-// 2. Rows of 2:3 portraits slide in above and below the card and run sideways in opposite directions; oversized
-//    text lines and the card brackets fade in around the card; text lines drift sideways.
+// 2. Rows of 2:3 portraits slide in above and below the card and run sideways in opposite directions;
+//    the card brackets fade in around the card. (Oversized drifting text lines exist but are off: SHOW_LINES.)
 // 3. Past ~72% of the pin, the signature draws on (played, not scrubbed) and un-draws on the way back up.
 // Reduced motion: no pin, the scene renders in its final state.
 import { gsap } from 'gsap'
@@ -10,19 +10,24 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { LightboxItem } from '~/composables/useLightbox'
 
 // Horizontal marquee: one row of portraits above the card, one below, running in opposite directions at slightly
-// different speeds. Each track is 14 tiles rendered three times, so the CSS loop (translateX by one set) is seamless
-// on screens up to ~4000px wide.
+// different speeds. Each track is 12 tiles rendered three times; one set (~2500px at 200px tiles) is wider than the
+// screen, so the CSS loop (translateX by one set) is seamless. The rows tuck behind the card so the tiles can be large.
 // Tiles are black and white at rest. Hovering (or focusing) any tile pauses both rows and brings that one tile back
 // to colour; clicking opens it in the shared lightbox, which pages through all portraits.
 type Row = { id: string; side: 't' | 'b'; left: boolean; speed: string; offset: string; first: number }
 const rows: Row[] = [
   { id: 'top', side: 't', left: true, speed: '90s', offset: '0s', first: 0 },
-  { id: 'bottom', side: 'b', left: false, speed: '110s', offset: '-40s', first: 14 }
+  { id: 'bottom', side: 'b', left: false, speed: '110s', offset: '-40s', first: 12 }
 ]
-const PER_ROW = 14
+const PER_ROW = 12
 const COPIES = 3 // keep in sync with the slide-x keyframe
 
-// Portraits for the rows: 14 each, top row first. Add `src` (a /public path or CMS URL) to swap a placeholder for a
+// Oversized background text lines ("Surat's premium wedding photographers" / "Big weddings, raw emotions").
+// Switched off for now at the client's request (2026-11-17); set true to bring them back (markup, styles and tweens
+// are all still here).
+const SHOW_LINES = false
+
+// Portraits for the rows: 12 each, top row first. Add `src` (a /public path or CMS URL) to swap a placeholder for a
 // photo; keep them 2:3 portrait.
 const portraits: LightboxItem[] = Array.from({ length: PER_ROW * rows.length }, (_, i) => ({
   alt: `Wedding portrait ${i + 1}`,
@@ -91,9 +96,12 @@ onMounted(() => {
           { top: gap, right: gap, bottom: gap, left: gap, duration: 0.6 }, 0)
         .fromTo(q('.intro__img'), { scale: 1.15 }, { scale: 1, duration: 0.6 }, 0)
         .fromTo(q('.intro__row'), { autoAlpha: 0, y: (_: number, t: HTMLElement) => (t.dataset.side === 'b' ? 60 : -60) }, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.05, ease: 'power2.out' }, 0.3)
-        .fromTo(q('.intro__lines'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: 'none' }, 0.35)
-        .fromTo(q('.intro__line--a'), { xPercent: 8 }, { xPercent: -8, duration: 1, ease: 'none' }, 0)
-        .fromTo(q('.intro__line--b'), { xPercent: -8 }, { xPercent: 8, duration: 1, ease: 'none' }, 0)
+
+      if (SHOW_LINES) {
+        tl.fromTo(q('.intro__lines'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: 'none' }, 0.35)
+          .fromTo(q('.intro__line--a'), { xPercent: 8 }, { xPercent: -8, duration: 1, ease: 'none' }, 0)
+          .fromTo(q('.intro__line--b'), { xPercent: -8 }, { xPercent: 8, duration: 1, ease: 'none' }, 0)
+      }
 
       if (!motion) {
         tl.progress(1)
@@ -113,7 +121,7 @@ onBeforeUnmount(() => { mm?.revert() })
     <h1 class="visually-hidden">The Taj Studio: wedding photography &amp; films in Surat</h1>
     <div class="intro__stage paper">
       <!-- Text lines sit behind the rows: they read in the gaps between the rows and the card. -->
-      <div class="intro__lines">
+      <div v-if="SHOW_LINES" class="intro__lines">
         <h2 class="intro__line intro__line--a">Surat’s premium wedding photographers</h2>
         <p class="intro__line intro__line--b" aria-hidden="true">Big weddings, raw emotions</p>
       </div>
@@ -121,7 +129,7 @@ onBeforeUnmount(() => { mm?.revert() })
       <div v-for="r in rows" :key="r.id" class="intro__row" :class="`intro__row--${r.side}`" :data-side="r.side">
         <div class="intro__track" :class="{ 'intro__track--right': !r.left }" :style="{ animationDuration: r.speed, animationDelay: r.offset }">
           <PhotoTile v-for="n in loop" :key="n" :items="portraits" :index="r.first + (n % PER_ROW)" :decorative="n >= PER_ROW"
-            class="intro__tile" />
+            sizes="xs:160px md:240px" class="intro__tile" />
         </div>
       </div>
 
@@ -159,9 +167,12 @@ onBeforeUnmount(() => { mm?.revert() })
   &__stage {
     --card-w: min(480px, 80vw);
     --card-h: calc(var(--card-w) * 253 / 480);
-    // Row height: what fits between the nav and the card, capped. Tiles are 2:3, so width follows.
-    --row: clamp(120px, calc((100svh - var(--card-h)) / 2 - var(--nav-height) - var(--space-2xl)), 220px);
-    --row-gap: calc(var(--card-h) / 2 + var(--space-sm) + var(--space-lg)); // centre to row edge: card + bracket gap + air
+    // Rows slide --tuck behind the card's top and bottom edges (the frame is stacked above them), which buys the
+    // tiles the height the fixed nav takes away. Row height: from just under the nav to --tuck inside the card, capped.
+    // Tiles are 2:3, so width follows. 1440x900: ~200x300.
+    --tuck: var(--space-3xl);
+    --row-gap: calc(var(--card-h) / 2 - var(--tuck)); // stage centre to the row's inner edge
+    --row: clamp(120px, calc(50svh - var(--nav-height) - var(--space-xs) - var(--row-gap)), 360px);
     position: relative;
     height: 100svh;
     min-height: 560px;
@@ -259,7 +270,7 @@ onBeforeUnmount(() => { mm?.revert() })
 @keyframes slide-x { to { transform: translateX(calc(-100% / 3)); } }
 
 @media (width <= 720px) {
-  .intro__stage { --card-w: 62vw; --row: clamp(120px, calc((100svh - var(--card-h)) / 2 - var(--nav-height) - var(--space-2xl)), 180px); }
+  .intro__stage { --card-w: 62vw; --tuck: var(--space-xl); --row: clamp(120px, calc(50svh - var(--nav-height) - var(--space-xs) - var(--row-gap)), 300px); }
   .intro__frame { --corner: 64px; }
 }
 // Hovering or focusing any tile freezes both rows, so the target holds still under the pointer.

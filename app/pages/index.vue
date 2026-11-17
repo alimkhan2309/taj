@@ -13,10 +13,11 @@ useSeoMeta({
     <HomeIntro />
     <HomeFeaturedWork />
     <HomeFilms />
+    <HomePreWedding />
     <PressStrip />
     <HomeCaseStudies />
     <HomeJourney />
-    <HomeAwaitingDesign title="Testimonials" note="Short endorsements with stars and a Google Reviews badge. Figma frame in progress." />
+    <HomeTestimonials />
     <HomeWhatToExpect />
     <HomeContact />
     <HomeBackdrop />

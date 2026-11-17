@@ -120,7 +120,7 @@ onBeforeUnmount(() => { mm?.revert(); ctx?.revert() })
                 class="journey__portrait-img" width="711" height="715" sizes="xs:90vw md:560px" loading="lazy" />
             </BracketFrame>
             <dl class="journey__stats">
-              <div v-for="(s, i) in stats" :key="s.label" class="journey__stat paper" :class="`journey__stat--${i}`">
+              <div v-for="(s, i) in stats" :key="s.label" class="journey__stat" :class="`journey__stat--${i}`">
                 <dt class="overline">{{ s.label }}</dt>
                 <dd>{{ s.value }}</dd>
               </div>
@@ -220,9 +220,10 @@ onBeforeUnmount(() => { mm?.revert(); ctx?.revert() })
     &__portrait-wrap { width: var(--portrait); }
     &__portrait { position: relative; z-index: 1; }
 
-    // Stats float round the portrait, on a base-colour chip so the crosshair passes behind them.
+    // Stats float round the portrait, clear of the crosshair (it crosses at the portrait centre; stats sit in the top and
+    // bottom thirds), so they need no chip: a chip of its own paper never lines up with the backdrop and shows as a patch.
     &__stats { display: contents; }
-    &__stat { position: absolute; z-index: 2; padding: var(--space-xs) var(--space-sm); background-color: var(--color-bg-base); }
+    &__stat { position: absolute; z-index: 2; padding: var(--space-xs) var(--space-sm); }
     &__stat--0 { left: calc(100% + var(--space-lg)); top: 14%; }
     &__stat--1 { right: calc(100% + var(--space-lg)); top: 24%; }
     &__stat--2 { left: calc(100% + var(--space-2xl)); bottom: 12%; }
